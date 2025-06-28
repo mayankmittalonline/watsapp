@@ -1,1 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Opener</title>
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+
+  <meta name="robots" content="noindex, nofollow">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: white;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .wrapper {
+      background: white;
+      padding: 20px;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      color: #25D366;
+      margin-bottom: 20px;
+    }
+
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 18px;
+      padding-bottom: 5px;
+
+    }
+
+    .input-prefix {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+
+
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      transition: border-color 0.2s;
+    }
+
+    input.invalid {
+      border-color: red;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .actions button {
+      flex: 1;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .send-btn {
+      background: #25D366;
+      margin-right: 5px;
+    }
+
+    .call-btn {
+      background: #34B7F1;
+      margin-left: 5px;
+    }
+
+    .history-section {
+      margin-top: 25px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background: #e0e0e0;
+    }
+
+    .btn-action {
+      display: inline-block;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #fff;
+      margin: 5px 5px 0 0;
+      vertical-align: middle;
+    }
+
+    .btn-msg {
+      background-color: #25D366;
+    }
+
+    .btn-call {
+      background-color: #34B7F1;
+    }
+
+    .clear-history {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      color: red;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    @media (max-width: 480px) {
+      .input-group {
+        flex-direction: row;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .actions button {
+        margin: 5px 0;
+      }
+
+      .btn-action {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h2>WhatsApp Opener</h2>
+    <div class="input-group">
+      <div class="input-prefix">+91</div>
+      <input type="text" id="mobileInput" maxlength="10" placeholder="Enter Mobile Number" inputmode="numeric"
+        pattern="[0-9]*">
+    </div>
+
+    <div class="actions">
+      <button class="send-btn" onclick="sendMessage()">Send Message</button>
+      <button class="call-btn" onclick="makeCall()">Make a Call</button>
+    </div>
+
+    <div class="history-section">
+      <h3 style="margin: 20px 0 10px;">History</h3>
+      <table id="historyTable"></table>
+      <div class="clear-history" onclick="clearHistory()">Clear History</div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('mobileInput');
+    const historyTable = document.getElementById('historyTable');
+
+    input.value = localStorage.getItem('lastNumber') || '';
+
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g, '');
+      input.classList.remove('invalid');
+    });
+
+    let history = JSON.parse(localStorage.getItem('waHistory') || '[]');
+    renderHistory();
+
+    function validateNumber(number) {
+      const isValid = /^\d{10}$/.test(number);
+      input.classList.toggle('invalid', !isValid);
+      return isValid;
+    }
+
+    function sendMessage() {
+      const number = input.value.trim();
+      if (!validateNumber(number)) return;
+
+      saveToHistory(number);
+      window.open(`https://wa.me/91${number}?text=Hii`, '_blank');
+    }
+
+    function makeCall() {
+      const number = input.value.trim();
+      if (!validateNumber(number)) return;
+
+      saveToHistory(number);
+      window.location.href = `tel:${number}`;
+    }
+
+    function saveToHistory(number) {
+      localStorage.setItem('lastNumber', number);
+      const now = new Date();
+      const timestamp = `${now.toLocaleDateString('en-IN')} & ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`;
+      history.unshift({ number, timestamp });
+      localStorage.setItem('waHistory', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const clearHistoryDiv = document.querySelector('.clear-history');
+
+      if (!history.length) {
+        historyTable.innerHTML = `<tr><td colspan="3" style="text-align:center;">No history found</td></tr>`;
+        clearHistoryDiv.style.display = 'none';
+        return;
+      }
+
+      clearHistoryDiv.style.display = 'block';
+
+      let html = `
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Mobile</th>
+            <th>Options</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
+
+      history.forEach(item => {
+        html += `
+          <tr>
+            <td>${item.timestamp}</td>
+            <td>
+              +91${item.number}<br/>
+            </td>
+
+            <td>
+              <button class="btn-action btn-msg" onclick="window.open('https://wa.me/91${item.number}?text=Hii', '_blank')" title="Message">💬</button>
+              <button class="btn-action btn-call" onclick="window.location.href='tel:${item.number}'" title="Call">📞</button>
+            </td>
+            
+          </tr>
+        `;
+      });
+
+      html += `</tbody>`;
+      historyTable.innerHTML = html;
+    }
+
+    function clearHistory() {
+      if (confirm("Clear all history?")) {
+        localStorage.removeItem('waHistory');
+        history = [];
+        renderHistory();
+      }
+    }
+
+    window.addEventListener('beforeunload', () => {
+      localStorage.setItem('lastNumber', input.value.trim());
+    });
+  </script>
+</body>
+
+</html>

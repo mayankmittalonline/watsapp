@@ -1,0 +1,19 @@
+{
+  "name": "WhatsApp Opener",
+  "short_name": "WhatsApp Opener",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://waopener.pages.dev/images/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://waopener.pages.dev/images/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
