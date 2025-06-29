@@ -1,8 +1,18 @@
+/manifest.json
+  Content-Type: application/manifest+json
+
+/service-worker.js
+  Cache-Control: no-cache
+
+/images/favicon.png
+  Cache-Control: public, max-age=31536000
+
 /*
   X-Content-Type-Options: nosniff
   X-Robots-Tag: nosnippet, noindex
   X-Frame-Options: DENY
   X-XSS-Protection: 1; mode=block
+  Referrer-Policy: no-referrer-when-downgrade
 
 
 
